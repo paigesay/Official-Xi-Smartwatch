@@ -3,6 +3,10 @@ import sys
 import time
 import datetime
 import random
+import os
+
+os.environ["SDL_VIDEODRIVERS"] = "fbcon"
+os.environ["SDL_FBDEV"] = "/dev/fb1"
 
 pygame.init()
 
