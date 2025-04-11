@@ -14,6 +14,7 @@ SCREEN_HEIGHT = 320
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Xi Smartwatch")
 
+
 # Colors
 BLACK      = (0, 0, 0)
 WHITE      = (255, 255, 255)
@@ -24,6 +25,28 @@ DARK_GRAY  = (30, 30, 30)
 BASE       = (107, 106, 105)
 LIGHT_GRAY = (217, 217, 217)
 BLUE       = (100, 149, 237)
+
+SWAP_XY = True       # Set to True if X and Y axes are swapped
+INVERT_X = False     # Set to True if X axis is inverted
+INVERT_Y = False     # Set to True if Y axis is inverted
+
+
+elif event.type == pygame.MOUSEMOTION and dragging:
+    # Apply the coordinate transformations
+    rel_x, rel_y = event.rel
+    
+    # Swap X and Y if needed
+    if SWAP_XY:
+        rel_x, rel_y = rel_y, rel_x
+    
+    # Invert axes if needed
+    if INVERT_X:
+        rel_x = -rel_x
+    if INVERT_Y:
+        rel_y = -rel_y
+
+    scroll_offset += rel_y
+    scroll_offset = max(min_scroll, min(scroll_offset, max_scroll))
 
 # Fonts for main screen
 font_time   = pygame.font.SysFont("Rubik", 88)
@@ -87,6 +110,19 @@ def draw_rounded_rect(surface, rect, color, radius):
     pygame.draw.circle(surface, color, (rect.left + radius, rect.bottom - radius), radius)
     pygame.draw.circle(surface, color, (rect.right - radius, rect.bottom - radius), radius)
 
+def transform_coords(pos):
+    """
+    Transforms touch input coordinates based on calibration settings.
+    """
+    x, y = pos
+    if SWAP_XY:
+        x, y = y, x
+    if INVERT_X:
+        x = SCREEN_WIDTH - x
+    if INVERT_Y:
+        y = SCREEN_HEIGHT - y
+    return (x, y)
+    
 def draw_rounded_rect_outline(surface, rect, color, radius, width):
     """
     Draws an outline of a rounded rectangle by drawing successive rounded rects.
@@ -318,7 +354,8 @@ while running:
             running = False
         # Detect mouse click on HOME_SCREEN for transition
         if event.type == pygame.MOUSEBUTTONDOWN and not transition_in_progress:
-            if current_screen == HOME_SCREEN and button_rect.collidepoint(mouse_x, mouse_y):
+            transformed_pos = transform_coords((mouse_x, mouse_y))
+            if current_screen == HOME_SCREEN and button_rect.collidepoint(transformed_pos):
                 transition_in_progress = True
                 current_screen = APP_SCREEN
 
