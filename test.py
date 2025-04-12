@@ -65,10 +65,10 @@ numgen_font       = pygame.font.SysFont(None, 36)
 numgen_large_font = pygame.font.SysFont(None, 48)
 
 # Screen states
-HOME_SCREEN       = 0
-APP_SCREEN        = 1
-STOPWATCH_SCREEN  = 2
-NUMGEN_SCREEN     = 3
+HOME_SCREEN = 0
+APP_SCREEN = 1
+STOPWATCH_SCREEN = 2
+NUMGEN_SCREEN = 3
 COMPLEX_APP_SCREEN = 4
 current_screen = HOME_SCREEN
 
@@ -89,7 +89,7 @@ button_rect = pygame.Rect(button_x, button_y, button_width, button_height)
 transition_in_progress = False
 
 # ----------------------
-# Helper functions to draw rounded rectangles (pygame 1.9.4 compatible)
+# Helper Function for the rounded rectangles
 # ----------------------
 def draw_rounded_rect(surface, rect, color, radius):
     """
@@ -139,7 +139,7 @@ def draw_rounded_rect_outline(surface, rect, color, radius, width):
 # ----------------------
 # appscreen functionality
 # ----------------------
-# List each app in the menu
+# List each app in the menu, below is the button visuals settings.
 menu_items = ["Stopwatch", "Number Generator", "Fitness Tracker"]
 item_height = 65
 spacing = 25
@@ -155,12 +155,12 @@ def run_app_menu(screen):
     dragging = False
     start_y = 0
 
-    # Define the scrollable area inside the light gray layer
+    # Defines the scrollable area inside the light gray layer
     scroll_area = pygame.Rect(20, 20, SCREEN_WIDTH - 40, SCREEN_HEIGHT - 40)
 
     while running:
         screen.fill(BASE)
-        # Draw light gray background layer (rounded)
+        # Draw light gray background layer
         layer_rect = pygame.Rect(10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
         draw_rounded_rect(screen, layer_rect, LIGHT_GRAY, 15)
 
@@ -169,7 +169,7 @@ def run_app_menu(screen):
         mouse_x, mouse_y = pygame.mouse.get_pos()
         adjusted_mouse_y = mouse_y - scroll_area.y
 
-        # Draw each menu item within the scroll surface
+        # Draws each menu item within the scroll surface
         for i, item in enumerate(menu_items):
             y_pos = 10 + i * (item_height + spacing) + scroll_offset
             if 0 <= y_pos <= scroll_area.height - item_height:
