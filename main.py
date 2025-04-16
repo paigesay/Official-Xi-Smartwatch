@@ -132,6 +132,9 @@ def run_app_menu(surface):
     running = True
     dragging = False
     scroll_area = pygame.Rect(20, 20, SCREEN_WIDTH - 40, SCREEN_HEIGHT - 40)
+
+    selected_index = 0
+
     while running:
         surface.fill(BASE)
         layer_rect = pygame.Rect(10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
@@ -139,11 +142,13 @@ def run_app_menu(surface):
         scroll_surface = surface.subsurface(scroll_area).copy()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         adjusted_mouse_y = mouse_y - scroll_area.y
+
         for i, item in enumerate(menu_items):
             y_pos = 10 + i * (item_height + spacing) + scroll_offset
             if 0 <= y_pos <= scroll_area.height - item_height:
                 container_rect = pygame.Rect(0, y_pos, scroll_area.width, item_height)
-                if container_rect.collidepoint(mouse_x - scroll_area.x, adjusted_mouse_y):
+
+                if (container_rect.collidepoint(mouse_x - scroll_area.x, adjusted_mouse_y)) or (i == selected_index):
                     draw_rounded_rect(scroll_surface, container_rect, GOLD, 10)
                     text = app_font.render(item, True, RED)
                 else:
@@ -169,6 +174,22 @@ def run_app_menu(surface):
                         return item.lower().replace(" ", "")
             elif event.type == pygame.MOUSEMOTION and dragging:
                 scroll_offset += event.rel[1]
+                scroll_offset = max(min_scroll, min(scroll_offset, max_scroll))
+            elif event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:  # Right scrolls down
+                    selected_index = (selected_index + 1) % len(menu_items)
+                elif event.key in [pygame.K_UP, pygame.K_LEFT]:  # Left scrolls up
+                    selected_index = (selected_index - 1) % len(menu_items)
+                elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:  # "Select"
+                    return menu_items[selected_index].lower().replace(" ", "")
+
+                # Auto-scroll so selected item is visible
+                selected_y = 10 + selected_index * (item_height + spacing)
+                if selected_y + scroll_offset < 0:
+                    scroll_offset = -selected_y
+                elif selected_y + item_height + scroll_offset > scroll_area.height:
+                    scroll_offset = scroll_area.height - (selected_y + item_height)
+
                 scroll_offset = max(min_scroll, min(scroll_offset, max_scroll))
         clock.tick(30)
 
@@ -772,11 +793,17 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if event.type == pygame.MOUSEBUTTONDOWN and not transition_in_progress:
+            if not transition_in_progress:
                 transformed_pos = transform_coords((mouse_x, mouse_y))
-                if current_screen == HOME_SCREEN and button_rect.collidepoint(transformed_pos):
-                    transition_in_progress = True
-                    current_screen = APP_SCREEN
+                if current_screen == HOME_SCREEN:
+                    if event.type == pygame.MOUSEBUTTONDOWN:
+                        if button_rect.collidepoint(transformed_pos):
+                            transition_in_progress = True
+                            current_screen = APP_SCREEN
+                    elif event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_SPACE:
+                            transition_in_progress = True
+                            current_screen = APP_SCREEN
         screen.fill(BASE)
         if current_screen == HOME_SCREEN:
             outer_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
