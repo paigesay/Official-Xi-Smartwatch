@@ -538,10 +538,16 @@ class Pony(pygame.sprite.Sprite):
         if self.vel == 0:
             self.flap = False
 
-        # User Input
+        # User Input TouchScreen
         if pygame.mouse.get_pressed()[0] and not self.flap and self.rect.y > 0 and self.alive:
             self.flap = True
             self.vel = -7
+            
+         # User Input with buttons
+        if pygame.key.get_pressed()[pygame.K_SPACE] and not self.flap and self.rect.y > 0 and self.alive:
+            self.flap = True
+            self.vel = -7
+            
             
 class Fence(pygame.sprite.Sprite):
     def __init__(self, x, y, image, fence_type): # takes coordinates of fence, image
@@ -682,6 +688,10 @@ def golden_pony():
             if wait_time > 30 and pygame.mouse.get_pressed()[0]:  # Half second delay (30 frames at 60fps)
                 score = 0
                 break
+            # Using buttons below
+            if wait_time > 30 and pygame.key.get_pressed()[pygame.K_SPACE]:  # Half second delay (30 frames at 60fps)
+                score = 0
+                break
 
         # Spawn Fences 
         if fence_timer <= 0 and pony.sprite.alive and not game_over:
@@ -719,6 +729,11 @@ def pony_menu():
                 else:
                     # 3. Otherwise, start the game
                     waiting = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                   waiting = False  # also start game with space
+                elif event.key == pygame.K_LEFT:
+                    return "back_to_app"
 
         screen.fill(BLACK)
         screen.blit(skyline_image, (0, 0))
