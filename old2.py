@@ -15,10 +15,12 @@ pygame.init()
 # ----------------------
 # Global Settings
 # ----------------------
-SCREEN_WIDTH = 480
+SCREEN_WIDTH = 520
 SCREEN_HEIGHT = 320
-screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Xi Smartwatch")
+
+screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+
+
 
 # Colors
 BLACK      = (0, 0, 0)
