@@ -132,9 +132,6 @@ def run_app_menu(surface):
     running = True
     dragging = False
     scroll_area = pygame.Rect(20, 20, SCREEN_WIDTH - 40, SCREEN_HEIGHT - 40)
-
-    selected_index = 0
-
     while running:
         surface.fill(BASE)
         layer_rect = pygame.Rect(10, 10, SCREEN_WIDTH - 20, SCREEN_HEIGHT - 20)
@@ -142,13 +139,11 @@ def run_app_menu(surface):
         scroll_surface = surface.subsurface(scroll_area).copy()
         mouse_x, mouse_y = pygame.mouse.get_pos()
         adjusted_mouse_y = mouse_y - scroll_area.y
-
         for i, item in enumerate(menu_items):
             y_pos = 10 + i * (item_height + spacing) + scroll_offset
             if 0 <= y_pos <= scroll_area.height - item_height:
                 container_rect = pygame.Rect(0, y_pos, scroll_area.width, item_height)
-
-                if (container_rect.collidepoint(mouse_x - scroll_area.x, adjusted_mouse_y)) or (i == selected_index):
+                if container_rect.collidepoint(mouse_x - scroll_area.x, adjusted_mouse_y):
                     draw_rounded_rect(scroll_surface, container_rect, GOLD, 10)
                     text = app_font.render(item, True, RED)
                 else:
@@ -174,22 +169,6 @@ def run_app_menu(surface):
                         return item.lower().replace(" ", "")
             elif event.type == pygame.MOUSEMOTION and dragging:
                 scroll_offset += event.rel[1]
-                scroll_offset = max(min_scroll, min(scroll_offset, max_scroll))
-            elif event.type == pygame.KEYDOWN:
-                if event.key in [pygame.K_DOWN, pygame.K_RIGHT]:  # Right scrolls down
-                    selected_index = (selected_index + 1) % len(menu_items)
-                elif event.key in [pygame.K_UP, pygame.K_LEFT]:  # Left scrolls up
-                    selected_index = (selected_index - 1) % len(menu_items)
-                elif event.key in [pygame.K_RETURN, pygame.K_SPACE]:  # "Select"
-                    return menu_items[selected_index].lower().replace(" ", "")
-
-                # Auto-scroll so selected item is visible
-                selected_y = 10 + selected_index * (item_height + spacing)
-                if selected_y + scroll_offset < 0:
-                    scroll_offset = -selected_y
-                elif selected_y + item_height + scroll_offset > scroll_area.height:
-                    scroll_offset = scroll_area.height - (selected_y + item_height)
-
                 scroll_offset = max(min_scroll, min(scroll_offset, max_scroll))
         clock.tick(30)
 
@@ -559,10 +538,16 @@ class Pony(pygame.sprite.Sprite):
         if self.vel == 0:
             self.flap = False
 
-        # User Input
+        # User Input TouchScreen
         if pygame.mouse.get_pressed()[0] and not self.flap and self.rect.y > 0 and self.alive:
             self.flap = True
             self.vel = -7
+            
+         # User Input with buttons
+        if pygame.key.get_pressed()[pygame.K_SPACE] and not self.flap and self.rect.y > 0 and self.alive:
+            self.flap = True
+            self.vel = -7
+            
             
 class Fence(pygame.sprite.Sprite):
     def __init__(self, x, y, image, fence_type): # takes coordinates of fence, image
@@ -703,6 +688,10 @@ def golden_pony():
             if wait_time > 30 and pygame.mouse.get_pressed()[0]:  # Half second delay (30 frames at 60fps)
                 score = 0
                 break
+            # Using buttons below
+            if wait_time > 30 and pygame.key.get_pressed()[pygame.K_SPACE]:  # Half second delay (30 frames at 60fps)
+                score = 0
+                break
 
         # Spawn Fences 
         if fence_timer <= 0 and pony.sprite.alive and not game_over:
@@ -740,6 +729,11 @@ def pony_menu():
                 else:
                     # 3. Otherwise, start the game
                     waiting = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                   waiting = False  # also start game with space
+                elif event.key == pygame.K_LEFT:
+                    return "back_to_app"
 
         screen.fill(BLACK)
         screen.blit(skyline_image, (0, 0))
@@ -778,17 +772,11 @@ def main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            if not transition_in_progress:
+            if event.type == pygame.MOUSEBUTTONDOWN and not transition_in_progress:
                 transformed_pos = transform_coords((mouse_x, mouse_y))
-                if current_screen == HOME_SCREEN:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        if button_rect.collidepoint(transformed_pos):
-                            transition_in_progress = True
-                            current_screen = APP_SCREEN
-                    elif event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE:
-                            transition_in_progress = True
-                            current_screen = APP_SCREEN
+                if current_screen == HOME_SCREEN and button_rect.collidepoint(transformed_pos):
+                    transition_in_progress = True
+                    current_screen = APP_SCREEN
         screen.fill(BASE)
         if current_screen == HOME_SCREEN:
             outer_rect = pygame.Rect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
