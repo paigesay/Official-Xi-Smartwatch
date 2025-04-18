@@ -571,15 +571,15 @@ class Fence(pygame.sprite.Sprite):
 
 class Ground(pygame.sprite.Sprite):
     def __init__(self, x, y):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = ground_image
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x, y
+        pygame.sprite.Sprite.__init__(self) # initialize the base sprite 
+        self.image = ground_image # sets image for the ground
+        self.rect = self.image.get_rect() # sets rectangular area for collision
+        self.rect.x, self.rect.y = x, y # sets initial position (x,y) of the ground
 
     def update(self):
-        self.rect.x -= scroll_speed
-        if self.rect.x <= -SCREEN_WIDTH:
-            self.kill()
+        self.rect.x -= scroll_speed # moves the ground leftward to create scrolling effect
+        if self.rect.x <= -SCREEN_WIDTH: # if ground scrolls offscreen, 
+            self.kill()                  # remove it 
 
 def quit_pony():
     for event in pygame.event.get():
