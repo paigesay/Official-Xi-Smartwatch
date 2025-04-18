@@ -39,7 +39,7 @@ INVERT_X = False     # Set to True if X axis is inverted
 INVERT_Y = False     # Set to True if Y axis is inverted
 
 # ----------------------
-# Fonts Initialization (make sure fonts are loaded after pygame.init())
+# Fonts Initialization
 # ----------------------
 pygame.font.init()
 font_time   = pygame.font.SysFont("Rubik", 88)
@@ -56,7 +56,7 @@ HOME_SCREEN = 0
 APP_SCREEN = 1
 NUMGEN_SCREEN = 3
 COMPLEX_APP_SCREEN = 4
-TIMER_SCREEN = 5   # New state for the timer/stopwatch app
+TIMER_SCREEN = 5
 
 current_screen = HOME_SCREEN
 transition_in_progress = False
@@ -194,7 +194,7 @@ def run_app_menu(surface):
         clock.tick(30)
 
 # ----------------------
-# Number Generator Functions
+# Number Generator App
 # ----------------------
 slider_x = 50
 slider_y = 150
@@ -297,7 +297,6 @@ def run_complex_app_screen(surface):
 # ----------------------
 # Timer & Stopwatch App (Integrated from timer.py)
 # ----------------------
-# Note: This Button class (and its methods) is used only in the timer/stopwatch app.
 class Button:
     def __init__(self, rect, text, image=None):
         self.rect = pygame.Rect(rect)
