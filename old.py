@@ -491,19 +491,27 @@ score_font = pygame.font.Font("assets/PressStart2P-Regular.ttf", 14)
 small_font = pygame.font.Font("assets/PressStart2P-Regular.ttf", 10)  # Smaller font for game over screen
 game_stopped = True
 
+# Function to update high score in this file
 def update_high_score_in_file(new_high_score):
     """Update the high score directly in the script file"""
     try:
+        # Get the full path to the current script
         script_path = os.path.abspath(__file__)
+        
+        # Read the entire file content
         with open(script_path, 'r') as f:
             content = f.read()
+            
+        # Use regex to find and replace the SAVED_HIGH_SCORE value
         new_content = re.sub(r'SAVED_HIGH_SCORE = \d+', f'SAVED_HIGH_SCORE = {new_high_score}', content)
+        
+        # Write the updated content back to the file
         with open(script_path, 'w') as f:
             f.write(new_content)
         return True
     except Exception as e:
-        print(f"Failed to update high score: {e}")
-        return False
+        print(f"Failed to update high score: {e}") # Print the reason for failure
+        return False # Tell the caller it failed
 
 class Pony(pygame.sprite.Sprite):
     def __init__(self):  # initializing the pony
@@ -519,6 +527,7 @@ class Pony(pygame.sprite.Sprite):
     def update(self):
         self.image_index += 1 # increments the image index to cycle through animation 
         if self.image_index >= 30: # resets the animation loop after 30 frames
+
             self.image_index = 0
         self.image = pony_images[self.image_index // 10] # change the pony's image every 10 frames for smooth animation 
         self.vel += 0.5 # apply gravity by increasing vertical velocity over time
@@ -533,20 +542,25 @@ class Pony(pygame.sprite.Sprite):
             self.vel = -7 # moves the pony upwards by applying -7 velocity downwards
 
 class Fence(pygame.sprite.Sprite):
-    def __init__(self, x, y, image, fence_type):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = image
-        self.rect = self.image.get_rect()
-        self.rect.x, self.rect.y = x, y
-        self.enter, self.exit, self.passed = False, False, False
-        self.fence_type = fence_type
+    """Upper/Lower Fence pipe pairing from right to left"""
+    def __init__(self, x, y, image, fence_type):  # Takes coordinates of fence, image
+        pygame.sprite.Sprite.__init__(self)  # Initialiize parent class
+        self.image = image  # = To graphic image displayed on surface
+        # Conveinent for checking for collisions 
+        self.rect = self.image.get_rect()  # Manipulate position of img for collisions
+        self.rect.x, self.rect.y = x, y # Set xy coords of img = to the xy coords we pass in agrs
+        self.enter, self.exit, self.passed = False, False, False # True/False variables that keep track of where the pony is moving to that one fence
+        self.fence_type = fence_type # Top or Bottom
 
     def update(self):
-        self.rect.x -= scroll_speed
-        if self.rect.x <= -SCREEN_WIDTH:
+        self.rect.x -= scroll_speed # Move left every frame
+        if self.rect.x <= -SCREEN_WIDTH: # If offscreen then destroy
             self.kill()
         global score 
+        # Scoring using bottom fence
         if self.fence_type == "bottom":
+        """When pony's x pos passes left edge mark "enter" = True
+            when it passes right edge mark "exit" = True, Then it is +1 score"""
             if pony_start_position[0] > self.rect.topleft[0] and not self.passed:
                 self.enter = True 
             if pony_start_position[0] > self.rect.topright[0] and not self.passed:
