@@ -506,31 +506,31 @@ def update_high_score_in_file(new_high_score):
         return False
 
 class Pony(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self)
-        self.image = pony_images[0]
-        self.rect = self.image.get_rect()
-        self.rect.center = pony_start_position
-        self.image_index = 0
-        self.vel = 0
-        self.flap = False
-        self.alive = True
+    def __init__(self):  # initializing the pony
+        pygame.sprite.Sprite.__init__(self) # turns the entire class into a sprite
+        self.image = pony_images[0] # loads the first frame of the "animation" 
+        self.rect = self.image.get_rect() # rectangle hitbox to track collisions 
+        self.rect.center = pony_start_position # mirrors the position of the pony png
+        self.image_index = 0 # used to track which image to show as animation progresses
+        self.vel = 0 # vertical velocity
+        self.flap = False # used to control flapping, ensuring user doesn't flap forever
+        self.alive = True # life status of pony
     
     def update(self):
-        self.image_index += 1
-        if self.image_index >= 30:
+        self.image_index += 1 # increments the image index to cycle through animation 
+        if self.image_index >= 30: # resets the animation loop after 30 frames
             self.image_index = 0
-        self.image = pony_images[self.image_index // 10]
-        self.vel += 0.5
-        if self.vel > 7:
+        self.image = pony_images[self.image_index // 10] # change the pony's image every 10 frames for smooth animation 
+        self.vel += 0.5 # apply gravity by increasing vertical velocity over time
+        if self.vel > 7: # caps maximum downward velocity
             self.vel = 7
-        if self.rect.y < 320:
+        if self.rect.y < 320: # move the pony downward by its current velocity, if not at the bottom edge
             self.rect.y += int(self.vel)
-        if self.vel == 0:
+        if self.vel == 0: # if velocity is zero, reset the flap flag
             self.flap = False
-        if pygame.mouse.get_pressed()[0] and not self.flap and self.rect.y > 0 and self.alive:
-            self.flap = True
-            self.vel = -7
+        if pygame.mouse.get_pressed()[0] and not self.flap and self.rect.y > 0 and self.alive:              # only allows flaps when a mouse/touchscreen input is recieved, 
+            self.flap = True # sets flap to true to avoid continuous flapping                               # a flap hasn't occured, the pony is above the bottom of the screen, and is alive
+            self.vel = -7 # moves the pony upwards by applying -7 velocity downwards
 
 class Fence(pygame.sprite.Sprite):
     def __init__(self, x, y, image, fence_type):
